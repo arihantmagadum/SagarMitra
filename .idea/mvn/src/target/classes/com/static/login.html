@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Login</title>
+    <style>
+        * {
+          box-sizing: border-box;
+          margin: 0; padding: 0;
+        }
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: #e0f7fa;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+        }
+
+        .login-container {
+          display: flex;
+          width: 800px;
+          height: 500px;
+          box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+          border-radius: 12px;
+          overflow: hidden;
+          background-color: #fff;
+        }
+
+        .login-form {
+          flex: 1;
+          padding: 3rem 2rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          background-color: #f1faff;
+        }
+
+        .login-form h2 {
+          margin-bottom: 2rem;
+          color: #0077b6;
+          text-align: center;
+        }
+
+        .login-form label {
+          margin-bottom: 0.5rem;
+          font-weight: 600;
+        }
+
+        .login-form input {
+          padding: 0.8rem;
+          margin-bottom: 1.5rem;
+          border-radius: 8px;
+          border: 1px solid #ccc;
+          font-size: 1rem;
+          width: 100%;
+        }
+
+        .login-form button {
+          padding: 0.8rem;
+          background-color: #0077b6;
+          color: white;
+          font-size: 1rem;
+          font-weight: 700;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background 0.3s ease;
+          width: 100%;
+        }
+
+        .login-form button:hover {
+          background-color: #005f8a;,.
+          l,
+        }
+
+        .tourism-image {
+          flex: 1;
+          background-image: url('https://www.anjanadri-honnavara-boating.com/assets/img/portfolio/boating2.jpg');
+          background-size: cover;
+          background-position: center;
+        }
+
+        @media (max-width: 768px) {
+          .login-container {
+            flex-direction: column;
+            height: auto;
+            width: 90%;
+          }
+          .tourism-image {
+            height: 250px;
+          }
+        }
+    </style>
+    <script>
+        function loginUser(event) {
+          event.preventDefault(); // Prevent form submission
+
+          let userPhone = document.getElementById("userPhone").value;
+          let userPassword = document.getElementById("userPassword").value;
+
+          fetch("/users/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userPhone, userPassword })
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log("Login Response:", data); // Debugging log
+
+            if (data.status === "success") {
+              sessionStorage.setItem("loggedInUser", data.userName); // Store user session
+              alert("Login successful!");
+              let lastPage = sessionStorage.getItem("lastPage") || "/home.html";
+              window.location.href = lastPage;
+            } else if (data.status === "wrong_password") {
+              alert("Incorrect password. Please try again!");
+            } else {
+              alert("User not found. Redirecting to registration...");
+              window.location.href = "/register.html";
+            }
+          })
+          .catch(error => console.error("Error:", error));
+        }
+    </script>
+</head>
+<body>
+
+<div class="login-container">
+    <div class="login-form">
+        <h2>Login to SagaraMitra</h2>
+        <form id="loginForm" onsubmit="loginUser(event)">
+            <label for="userPhone">Phone Number:</label>
+            <input type="text" id="userPhone" name="userPhone" required>
+
+            <label for="userPassword">Password:</label>
+            <input type="password" id="userPassword" name="userPassword" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    <div class="tourism-image"></div>
+</div>
+
+</body>
+</html>
