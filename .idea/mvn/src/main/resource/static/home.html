@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Home - SagaraMitra</title>
+    <style>
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+          position: relative;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          color: #fff;
+          background: url('https://static2.tripoto.com/media/filter/tst/img/2080710/SpotDocument/1614188812_1614188810523.jpg.webp') no-repeat center center fixed;
+          background-size: cover;
+        }
+
+        /* Fog-like overlay above the background image */
+        body::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          z-index: -1;
+          pointer-events: none;
+          background:
+            radial-gradient(ellipse at 50% 85%, rgba(255,255,255,0.60) 0%, rgba(255,255,255,0.27) 55%, rgba(255,255,255,0) 95%),
+            linear-gradient(180deg, rgba(255,255,255,0.18) 10%, rgba(255,255,255,0.0) 70%);
+        }
+
+        /* DARK MODE NAVBAR */
+        nav {
+          width: 100vw;
+          left: 0;
+          right: 0;
+          margin: 0;
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem 2rem;
+          background: rgba(18,32,49, 0.93); /* dark semi-opaque blue-black */
+          box-shadow: 0 2px 24px 0px rgba(0,0,0,0.2);
+          border-bottom: 3px solid #2c4e76; /* sharp, strong colored line for definition */
+          /* No border-radius, full-width bar */
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+        }
+
+        nav button,
+        .profile-btn {
+          background-color: #fec84d;
+          border: none;
+          color: #183247;
+          font-weight: 600;
+          padding: 10px 22px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 1rem;
+          margin: 0 0.15em;
+          box-shadow: 0 4px 12px rgba(254, 200, 77, 0.18);
+          transition: background 0.3s, color 0.25s, box-shadow 0.3s;
+        }
+        .profile-btn {
+          background: transparent;
+          border: 2px solid #fec84d;
+          color: #fec84d;
+        }
+
+        nav button:hover,
+        .profile-btn:hover {
+          background: #ffd47d;
+          color: #183247;
+          box-shadow: 0 5px 16px 0px rgba(255,200,77,0.19);
+        }
+        .profile-btn:hover {
+          background: #fec84d;
+          color: #183247;
+        }
+
+        main {
+          flex-grow: 1;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 3rem 6rem;
+          max-width: 1200px;
+          margin: auto;
+          gap: 3rem;
+        }
+
+        .description {
+          max-width: 600px;
+          font-size: 1.2rem;
+          line-height: 1.6;
+          text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.18);
+          background: rgba(25,35,55,0.70); /* dark glass for dark mode feel */
+          border-radius: 18px;
+          padding: 2rem;
+          color: #ffe;
+          box-shadow: 0 4px 16px rgba(80,120,180, 0.04);
+        }
+
+        .description h1 {
+          font-size: 3rem;
+          margin-bottom: 0.5rem;
+          letter-spacing: 2px;
+          font-weight: 700;
+          color: #fec84d;
+          text-shadow: 2px 2px 7px rgba(24,32,60,0.33);
+        }
+
+        .description p {
+          margin-bottom: 2rem;
+          color: #cddeec;
+        }
+
+        .btn-getstarted {
+          background-color: #fec84d;
+          color: #183247;
+          font-weight: 700;
+          padding: 14px 36px;
+          border-radius: 11px;
+          cursor: pointer;
+          font-size: 1.2rem;
+          box-shadow: 0 6px 18px rgba(254, 200, 77, 0.13);
+          border: none;
+          transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn-getstarted:hover {
+          background-color: #ffd47d;
+          transform: translateY(-3px);
+        }
+
+        @media (max-width: 900px) {
+          main {
+            flex-direction: column;
+            padding: 2rem 2rem;
+            gap: 2rem;
+            align-items: center;
+            text-align: center;
+          }
+          .description {
+            max-width: 100%;
+          }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top navigation bar -->
+<nav>
+    <form id="logoutForm" style="margin:0;">
+        <button type="submit">Logout</button>
+    </form>
+    <button class="profile-btn" onclick="window.location.href='profile.html'">Profile</button>
+</nav>
+
+<main>
+    <section class="description" aria-label="About SagaraMitra">
+        <h1>SagaraMitra</h1>
+        <p>
+            SagaraMitra is your trusted boat booking platform, providing seamless access to serene backwaters, thrilling tours, and unforgettable marine adventures.
+            Discover the magic of the sea with easy bookings and personalized experiences tailored just for you.
+        </p>
+        <button class="btn-getstarted" onclick="window.location.href='locations.html'">Show Available Locations</button>
+    </section>
+</main>
+
+<script>
+    document.getElementById("logoutForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+      fetch("/users/logout", { method: "POST" })
+      .then(response => response.text())
+      .then(data => {
+          if (data === "success" || data.includes("Logged out")) {
+              alert("Logout successful.");
+              window.location.href = "/index.html";
+          } else {
+              alert("Logout failed.");
+          }
+      })
+      .catch(error => {
+          console.error("Logout error:", error);
+          alert("Logout request failed.");
+      });
+    });
+</script>
+
+</body>
+</html>

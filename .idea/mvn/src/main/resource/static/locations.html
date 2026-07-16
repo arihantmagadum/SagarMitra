@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Available Locations</title>
+  <style>
+    .card-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .card {
+        width: 200px;
+        border: 1px solid #ccc;
+        border-radius: 12px;
+        box-shadow: 2px 2px 8px gray;
+        overflow: hidden;
+        text-align: center;
+        padding: 10px;
+    }
+    .card img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Available Boat Pickup & Drop Locations</h2>
+<div class="card-container" id="locationsContainer">
+  Loading
+ * '[fbty7jk8il9;0'-p=[
+/  \...
+</div>
+
+<script>
+  fetch("http://localhost:8081/locations/distinct")
+      .then(res => res.json())
+      .then(locations => {
+          const container = document.getElementById("locationsContainer");
+          container.innerHTML = "";
+
+          locations.forEach(loc => {
+              const card = document.createElement("div");
+              card.className = "card";
+              card.style.cursor = "pointer"; //make clickable
+              card.innerHTML = `
+                  <img src="images/${encodeURIComponent(loc.toLowerCase())}.jpg" alt="${loc}">
+                  <h3>${loc}</h3>
+              `;
+               card.addEventListener("click", () => {
+                  localStorage.setItem("selectedLocation", loc);
+                  window.location.href = "boats.html";
+              });
+
+              container.appendChild(card);
+          });
+      })
+      .catch(error => {
+          console.error("Error loading locations:", error);
+          document.getElementById("locationsContainer").innerText = "Failed to load locations.";
+      });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Boat Booking Payment</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+<h2>Processing Payment...</h2>
+
+<script>
+    // Read booking details from localStorage
+    const boatType = localStorage.getItem("boatType");
+    const userId = localStorage.getItem("userId");
+    const boatId = localStorage.getItem("boatId");
+    const slotId = localStorage.getItem("slotId");
+    const bookingDate = localStorage.getItem("bookingDate");
+    const seatCount = parseInt(localStorage.getItem("seatCount")) || 1;
+
+    // Amount: 500 per seat for public, 1500 fixed for private
+    const amount = boatType === "public" ? 500 * seatCount : 1500;
+
+    // Create Razorpay order from backend
+    fetch(`http://localhost:8081/api/payments/create-order?amount=${amount}&currency=INR`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(order => {
+        const options = {
+            key: "rzp_test_QLskUZfgxNvznF", // Your Razorpay API key
+            amount: order.amount,
+            currency: order.currency,
+            name: "SagaraMitra",
+            description: "Boat Booking Payment",
+            order_id: order.id,
+            handler: function (response) {
+                // Payment success → Confirm booking
+                const bookingData = {
+                    userId: userId,
+                    boatId: boatId,
+                    slotId: slotId,
+                    date: bookingDate,
+                    seatCount: seatCount
+                };
+
+                const url = `http://localhost:8081/api/bookings/${boatType}/confirm`;
+
+                fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(bookingData)
+                })
+                .then(res => res.text())
+                .then(msg => {
+                    alert("Booking Successful! " + msg);
+                    window.location.href = "profile.html";
+                })
+                .catch(err => {
+                    alert("Payment done but booking failed. Contact support.");
+                    console.error(err);
+                });
+            },
+            modal: {
+                ondismiss: function() {
+                    alert("Payment cancelled. Redirecting back to boats.");
+                    window.location.href = "boats.html";
+                }
+            },
+            theme: { color: "#3399cc" }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+    })
+    .catch(err => {
+        alert("Error creating payment order. Try again.");
+        console.error(err);
+    });
+</script>
+</body>
+</html>

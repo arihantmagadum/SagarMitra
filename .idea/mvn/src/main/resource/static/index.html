@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SagaraMitra - Home</title>
+    <style>
+        /* Reset */
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: #e6f9ff;
+          color: #03435f;
+          line-height: 1.6;
+        }
+        /* Nav */
+        header {
+          position: fixed;
+          top: 0; left: 0; right: 0;
+          background: #0077b6;
+          color: white;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.75rem 2rem;
+          z-index: 1000;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        header .logo {
+          font-weight: 700;
+          font-size: 1.5rem;
+          letter-spacing: 1px;
+        }
+        header nav a {
+          color: white;
+          text-decoration: none;
+          margin-left: 1.5rem;
+          font-weight: 600;
+          transition: color 0.3s ease;
+        }
+        header nav a:hover {
+          color: #90e0ef;
+        }
+        /* Spacer so page content not hidden behind fixed header */
+        .spacer {
+          height: 60px;
+        }
+        /* Hero Slider */
+        .hero {
+          position: relative;
+          height: 450px;
+          overflow: hidden;
+          margin-bottom: 3rem;
+        }
+        .hero img {
+          width: 100%;
+          height: 450px;
+          object-fit: cover;
+          position: absolute;
+          top: 0; left: 0;
+          opacity: 0;
+          transition: opacity 1s ease-in-out;
+        }
+        .hero img.active {
+          opacity: 0.9;
+          position: relative;
+        }
+        .hero .overlay-text {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: #fff;
+          font-size: 2.8rem;
+          font-weight: 700;
+          text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+          pointer-events: none;
+          user-select: none;
+        }
+        /* Sections */
+        section {
+          max-width: 1100px;
+          margin: auto;
+          padding: 0 2rem 3rem;
+        }
+        section h2 {
+          text-align: center;
+          margin-bottom: 1rem;
+          color: #023e8a;
+        }
+        /* About Boating */
+        .about-boating {
+          background: #caf0f8;
+          border-radius: 12px;
+          padding: 2rem;
+          font-size: 1.1rem;
+          color: #03045e;
+          text-align: center;
+        }
+        /* Nature & Places */
+        .places-grid {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 1.8rem;
+  padding: 1rem 0;
+}
+.carousel-container {
+  position: relative;
+  margin-top: 1rem;
+}
+        .place-card {
+  flex: 0 0 auto;
+  width: 260px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  background: white;
+  transition: transform 0.3s ease;
+}
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  background: rgba(0, 119, 182, 0.8);
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  z-index: 10;
+  border-radius: 50%;
+  transition: background 0.3s ease;
+}
+.carousel-btn:hover {
+  background: rgba(0, 119, 182, 1);
+}
+.carousel-btn.left {
+  left: 0;
+}
+.carousel-btn.right {
+  right: 0;
+}
+        .place-card:hover {
+          transform: scale(1.05);
+        }
+        .place-card img {
+          width: 100%;
+          height: 160px;
+          object-fit: cover;
+        }
+        .place-card h3 {
+          padding: 1rem;
+          font-weight: 700;
+          color: #0077b6;
+        }
+        /* Features */
+        .features {
+          display: flex;
+          justify-content: space-around;
+          flex-wrap: wrap;
+          gap: 2rem;
+        }
+        .feature-card {
+          background: #ade8f4;
+          border-radius: 12px;
+          flex: 1 1 220px;
+          padding: 1.8rem;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+          text-align: center;
+        }
+        .feature-card h3 {
+          margin-bottom: 0.8rem;
+          color: #03045e;
+        }
+        .feature-card p {
+          font-size: 1rem;
+        }
+        /* CTA */
+        .cta-section {
+          background: #0077b6;
+          color: white;
+          text-align: center;
+          padding: 3rem 1rem;
+          border-radius: 12px;
+          margin-bottom: 3rem;
+        }
+        .cta-section h2 {
+          font-size: 2rem;
+          margin-bottom: 1rem;
+        }
+        .cta-section a {
+          display: inline-block;
+          background: #90e0ef;
+          color: #0077b6;
+          padding: 0.8rem 2rem;
+          font-weight: 700;
+          border-radius: 30px;
+          text-decoration: none;
+          transition: background 0.3s ease;
+        }
+        .cta-section a:hover {
+          background: #caf0f8;
+        }
+        /* Footer */
+        footer {
+          background: #023e8a;
+          color: white;
+          text-align: center;
+          padding: 1rem 2rem;
+          font-size: 0.9rem;
+        }
+        /* Responsive */
+        @media(max-width: 768px) {
+          .features {
+            flex-direction: column;
+            align-items: center;
+          }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">SagaraMitra</div>
+    <nav>
+        <a href="/login.html">Login</a>
+        <a href="/register.html">Register</a>
+    </nav>
+</header>
+<div class="spacer"></div>
+
+<!-- Hero slider -->
+<div class="hero" aria-label="Boating images slider">
+    <img src="https://honnavartourism.com/wp-content/uploads/2024/04/honnavar-tourism-4.jpg" alt="Boat sailing on calm water" class="active" />
+    <img src="https://honnavartourism.com/wp-content/uploads/2024/04/honnavar-tourism-1.jpg" alt="Sunset river boating" />
+    <img src="https://honnavartourism.com/wp-content/uploads/2024/04/honnavar-tourism-12.jpg" alt="Nature and boats animation" />
+    <div class="overlay-text">Explore. Ride. Relax.</div>
+</div>
+
+<!-- About Boating -->
+<section class="about-boating" id="about-boating">
+    <h2>About Boating</h2>
+    <p>Boating with SagaraMitra is your gateway to exploring serene waters, breathtaking landscapes, and peaceful moments on the lake or river. Whether you're a first-timer or an experienced sailor, our boats are safe, comfortable, and ready for your next adventure.</p>
+</section>
+
+<!-- Nature & Places -->
+<section id="nature-places">
+    <h2>Discover Nature & Places</h2>
+    <div class="carousel-container">
+        <button class="carousel-btn left" onclick="scrollPlaces(-1)">&#10094;</button>
+        <div class="places-grid" id="placesGrid">
+            <div class="place-card">
+                <img src="https://static.toiimg.com/photo/msid-50497586,width-96,height-65.cms" alt="Tropical lake"/>
+                <h3>Eco Beach</h3>
+            </div>
+            <div class="place-card">
+                <img src="https://www.trawell.in/admin/images/upload/109288826Murudeshwar_Apsarakonda_Main.jpg" alt="Riverside trees"/>
+                <h3>Apsarakonda Waterfalls</h3>
+            </div>
+            <div class="place-card">
+                <img src="https://www.trawell.in/admin/images/upload/896636173Honnavar-backwaters.jpg" alt="Mountain lake"/>
+                <h3>Honnavar Backwaters</h3>
+            </div>
+            <div class="place-card">
+                <img src="https://images.deccanherald.com/deccanherald%2Fimport%2Fsites%2Fdh%2Ffiles%2Farticleimages%2F2021%2F02%2F21%2Ffile7eiuvhcv6pi1kiwpxii1-952991-1613849401.jpg?auto=format%2Ccompress&fmt=webp&fit=max&format=webp&q=70&w=400&dpr=2" alt="Mountain lake"/>
+                <h3>Sharavati Bridge</h3>
+            </div>
+            <div class="place-card">
+                <img src="https://content3.jdmagicbox.com/comp/karwar/q6/9999p8386.8386.220609234753.y4q6/catalogue/sharavati-backwater-boat-ride-honavar-karwar-ag9c7ixyas.jpg" alt="Mountain lake"/>
+                <h3>Honnavar Boating</h3>
+            </div>
+
+            <!-- Add more place-cards as needed -->
+        </div>
+        <button class="carousel-btn right" onclick="scrollPlaces(1)">&#10095;</button>
+    </div>
+</section>
+
+
+<!-- Features -->
+<section id="features">
+    <h2>App Features</h2>
+    <div class="features">
+        <div class="feature-card">
+            <h3>Easy Booking</h3>
+            <p>Book your preferred boat quickly and hassle-free with real-time availability.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Slot Availability</h3>
+            <p>Check available time slots and plan your boating adventure ahead of time.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Booking History</h3>
+            <p>Track all your past bookings and manage them easily from your profile.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta-section">
+    <h2>Ready to Explore the Waters?</h2>
+    <a href="/register.html">Get Started Now</a>
+</section>
+
+<footer>
+    <p>© 2025 SagaraMitra. All rights reserved. | Contact: info@sagaramitra.com</p>
+</footer>
+
+<script>
+    // Simple GIF slider logic
+    const slides = document.querySelectorAll('.hero img');
+    let current = 0;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+    }
+    function scrollPlaces(direction) {
+  const grid = document.getElementById('placesGrid');
+  const scrollAmount = 300;
+  grid.scrollBy({
+    left: direction * scrollAmount,
+    behavior: 'smooth'
+  });
+}
+
+
+    function nextSlide() {
+      current = (current + 1) % slides.length;
+      showSlide(current);
+    }
+
+    setInterval(nextSlide, 5000); // change slide every 5 seconds
+</script>
+
+</body>
+</html>

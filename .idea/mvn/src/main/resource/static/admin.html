@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Boat Management</title>
+    <script>
+        async function addBoatOwner(event) {
+            event.preventDefault();
+
+            const ownerName = document.getElementById("ownerName").value;
+            const ownerPhone = document.getElementById("ownerPhone").value;
+
+            const response = await fetch("/admin/addBoatOwner", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ownerName, ownerPhone })
+            });
+
+            if (response.ok) {
+                alert("Boat owner added successfully!");
+                loadBoatOwners();
+            } else {
+                alert("Error adding boat owner.");
+            }
+        }
+
+        async function addBoat(event, type) {
+            event.preventDefault();
+
+            const boatName = document.getElementById(`${type}BoatName`).value;
+            const location = document.getElementById(`${type}BoatLocation`).value;
+            const capacity = type === "public" ? document.getElementById("publicBoatCapacity").value : null;
+            const ownerId = document.getElementById(`${type}BoatOwner`).value;
+
+            const boatData = { boatName, pickupDropLocation: location, owner: { ownerId } };
+            if (capacity) boatData.capacity = capacity;
+
+            const response = await fetch(`/admin/add${type.charAt(0).toUpperCase() + type.slice(1)}Boat`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(boatData)
+            });
+
+            if (response.ok) {
+                alert(`${type} boat added successfully!`);
+                loadBoats();
+            } else {
+                alert("Error adding boat.");
+            }
+        }
+
+        async function loadBoatOwners() {
+            const response = await fetch("/admin/boatOwners");
+            const owners = await response.json();
+            const ownerSelects = [document.getElementById("publicBoatOwner"), document.getElementById("privateBoatOwner")];
+
+            ownerSelects.forEach(select => {
+                select.innerHTML = "";
+                owners.forEach(owner => {
+                    const option = document.createElement("option");
+                    option.value = owner.ownerId;
+                    option.textContent = `${owner.ownerName} (${owner.ownerPhone})`;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        async function loadBoats() {
+            try {
+                const publicResponse = await fetch("/admin/publicBoats");
+                const privateResponse = await fetch("/admin/privateBoats");
+
+                const publicBoats = await publicResponse.json();
+                const privateBoats = await privateResponse.json();
+
+                const publicList = document.getElementById("publicBoatList");
+                const privateList = document.getElementById("privateBoatList");
+
+                publicList.innerHTML = privateList.innerHTML = "";
+
+                publicBoats.forEach(boat => {
+                    const row = `<tr>
+                        <td>${boat.boatId}</td>
+                        <td>${boat.boatName}</td>
+                        <td>${boat.capacity}</td>
+                        <td>${boat.pickupDropLocation}</td>
+                        <td>
+                            <button onclick="deleteBoat(${boat.boatId})" style="background: red; color: white; border: none; padding: 5px; cursor: pointer;">Delete</button>
+                        </td>
+                    </tr>`;
+                    publicList.innerHTML += row;
+                });
+
+                privateBoats.forEach(boat => {
+                    const row = `<tr>
+                        <td>${boat.boatId}</td>
+                        <td>${boat.boatName}</td>
+                        <td>${boat.pickupDropLocation}</td>
+                        <td>
+                            <button onclick="deleteBoat(${boat.boatId})" style="background: red; color: white; border: none; padding: 5px; cursor: pointer;">Delete</button>
+                        </td>
+                    </tr>`;
+                    privateList.innerHTML += row;
+                });
+
+            } catch (error) {
+                console.error("Error loading boats:", error);
+            }
+        }
+
+        async function deleteBoat(boatId) {
+            if (confirm("Are you sure you want to delete this boat?")) {
+                try {
+                    const response = await fetch(`/admin/deleteBoat/${boatId}`, {
+                        method: "DELETE",
+                    });
+
+                    if (response.ok) {
+                        alert("Boat deleted successfully!");
+                        loadBoats();
+                    } else {
+                        alert("Error deleting boat.");
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                }
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadBoatOwners();
+            loadBoats();
+        });
+    </script>
+</head>
+<body>
+<h1>Admin - Boat Management</h1>
+
+<h2>Add Boat Owner</h2>
+<form onsubmit="addBoatOwner(event)">
+    <label>Owner Name:</label>
+    <input type="text" id="ownerName" required>
+    <label>Owner Phone:</label>
+    <input type="text" id="ownerPhone" required>
+    <button type="submit">Add Owner</button>
+</form>
+
+<h2>Add Public Boat</h2>
+<form onsubmit="addBoat(event, 'public')">
+    <label>Boat Name:</label>
+    <input type="text" id="publicBoatName" required>
+    <label>Capacity:</label>
+    <input type="number" id="publicBoatCapacity" required>
+    <label>Pickup/Drop Location:</label>
+    <input type="text" id="publicBoatLocation" required>
+    <label>Owner:</label>
+    <select id="publicBoatOwner"></select>
+    <button type="submit">Add Public Boat</button>
+</form>
+
+<h2>Add Private Boat</h2>
+<form onsubmit="addBoat(event, 'private')">
+    <label>Boat Name:</label>
+    <input type="text" id="privateBoatName" required>
+    <label>Pickup/Drop Location:</label>
+    <input type="text" id="privateBoatLocation" required>
+    <label>Owner:</label>
+    <select id="privateBoatOwner"></select>
+    <button type="submit">Add Private Boat</button>
+</form>
+
+<h2>Public Boats</h2>
+<table border="1">
+    <thead>
+    <tr>
+        <th>Boat ID</th>
+        <th>Name</th>
+        <th>Capacity</th>
+        <th>Location</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody id="publicBoatList"></tbody>
+</table>
+
+<h2>Private Boats</h2>
+<table border="1">
+    <thead>
+    <tr>
+        <th>Boat ID</th>
+        <th>Name</th>
+        <th>Location</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody id="privateBoatList"></tbody>
+</table>
+</body>
+</html>

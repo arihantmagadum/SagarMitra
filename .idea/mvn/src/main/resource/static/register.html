@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SagaraMitra • Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+
+    <style>
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+          font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+  background: url("https://static.vecteezy.com/system/resources/thumbnails/040/890/255/small_2x/ai-generated-empty-wooden-table-on-the-natural-background-for-product-display-free-photo.jpg") no-repeat center top;
+  background-size: cover;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-position: center top;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+
+        .hero {
+          margin-top: 20px;
+          color: #fff;
+          text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+          font-size: 2.2rem;
+          font-weight: 600;
+          animation: fadeInDown 1s ease;
+        }
+
+        @keyframes fadeInDown {
+          from { opacity: 0; transform: translateY(-30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+  background: rgba(255, 255, 255, 0.7); /* semi-transparent white */
+  padding: 30px 25px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  backdrop-filter: blur(10px); /* optional: adds a glass effect */
+}
+
+
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card h2 {
+          text-align: center;
+          margin-bottom: 1.2rem;
+          color: #ffffff;
+          font-weight: 600;
+          font-size: 1.6rem;
+          text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .form-group {
+          margin-bottom: 1.1rem;
+        }
+
+        .form-group input {
+          width: 100%;
+          padding: 12px;
+          border-radius: 8px;
+          border: 1px solid rgba(255,255,255,0.3);
+          background: rgba(255,255,255,0.2);
+          color: #fff;
+          font-size: 1rem;
+          transition: 0.3s;
+        }
+
+        .form-group input::placeholder {
+          color: #e0e0e0;
+        }
+
+        .form-group input:focus {
+          outline: none;
+          border-color: #2d89ff;
+          background-color: rgba(255, 255, 255, 0.25);
+          box-shadow: 0 0 8px #2d89ff;
+        }
+
+        .btn-primary {
+          width: 100%;
+          padding: 12px;
+          background: #2d89ff;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: 0.3s;
+          font-weight: 500;
+        }
+
+        .btn-primary:hover {
+          background: #1a66e0;
+          transform: scale(1.02);
+        }
+
+        .water {
+          position: absolute;
+          bottom: 0;
+          width: 100%;
+          height: 90px;
+          background: url('images/water.png') repeat-x;
+          background-size: contain;
+          animation: wave 6s linear infinite;
+          z-index: -1;
+        }
+
+        @keyframes wave {
+          from { background-position-x: 0; }
+          to { background-position-x: 1000px; }
+        }
+
+        @media (max-width: 480px) {
+          .card h2 { font-size: 1.3rem; }
+          .hero { font-size: 1.7rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero">Join SagaraMitra</div>
+
+<div class="card">
+    <h2>Create your account</h2>
+    <form id="registerForm">
+        <div class="form-group">
+            <input type="text" id="userName" placeholder="Full Name" required />
+        </div>
+        <div class="form-group">
+            <input type="number" id="userAge" placeholder="Age" min="1" required />
+        </div>
+        <div class="form-group">
+            <input type="tel" id="userPhone" placeholder="Phone Number" maxlength="15" required />
+        </div>
+        <div class="form-group">
+            <input type="password" id="userPassword" placeholder="Password (max 8 chars)" maxlength="8" required />
+        </div>
+        <button type="submit" class="btn-primary">Register</button>
+    </form>
+</div>
+
+<div class="water"></div>
+
+<script>
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const user = {
+        userName: document.getElementById("userName").value.trim(),
+        userAge: +document.getElementById("userAge").value,
+        userPhone: document.getElementById("userPhone").value.trim(),
+        userPassword: document.getElementById("userPassword").value
+      };
+
+      try {
+        const res = await fetch("http://localhost:8081/users/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(user)
+        });
+
+        const msg = await res.text();
+
+        if (msg.toLowerCase().includes("success")) {
+          window.location.href = "login.html";
+        } else {
+          alert("Registration failed.");
+        }
+      } catch (err) {
+        console.error("Registration error:", err);
+        alert("Registration failed. Please try again.");
+      }
+    });
+</script>
+</body>
+</html>
