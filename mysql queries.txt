@@ -1,0 +1,281 @@
+• Registration
+
+DELIMITER //
+
+CREATE PROCEDURE RegisterUser(
+    IN p_user_name VARCHAR(100),
+    IN p_user_age INT,
+    IN p_user_phone VARCHAR(15),
+    IN p_user_password VARCHAR(255)
+)
+BEGIN
+    DECLARE user_count INT;
+
+    -- Check if the phone number already exists
+    SELECT COUNT(*) INTO user_count FROM Users WHERE user_phone = p_user_phone;
+
+    IF user_count > 0 THEN
+        SELECT 'User already exists!' AS MESSAGE;
+    ELSE
+        -- Insert new user with hashed password
+        INSERT INTO Users (user_name, user_age, user_phone, user_password) 
+        VALUES (p_user_name, p_user_age, p_user_phone, p_user_password);
+        SELECT 'Registration successful' AS MESSAGE;
+
+    END IF;
+END //
+
+DELIMITER ;
+
+CALL RegisterUser('Basanagoud', 23, '7204794861', 'Basu123');
+
+---------------------------------------------------------------------------------
+• Login
+
+DELIMITER //
+
+CREATE PROCEDURE UserLogin(
+    IN p_user_phone VARCHAR(15),
+    IN p_user_password VARCHAR(255)
+)
+BEGIN
+    DECLARE user_count INT;
+
+    -- Check if the user exists with the correct password
+    SELECT COUNT(*) INTO user_count 
+    FROM Users 
+    WHERE user_phone = p_user_phone 
+    AND user_password = p_user_password;
+
+    IF user_count > 0 THEN
+        SELECT 'Login successful' AS Message;
+    ELSE
+        SELECT 'Invalid phone number or password' AS Message;
+    END IF;
+END //
+
+DELIMITER ;
+
+CALL UserLogin('9876543210', 'securepassword123');
+
+-------------------------------------------------------------------------------
+• Tables
+
+mysql> show tables;
++-----------------------+
+| Tables_in_sagaramitra |
++-----------------------+
+| boat_owners           |
+| private_boat_booking  |
+| private_boat_slots    |
+| private_boat_status   |
+| private_boats         |
+| public_boat_booking   |
+| public_boat_slots     |
+| public_boat_status    |
+| public_boats          |
+| users                 |
++-----------------------+
+10 rows in set (0.07 sec)
+
+
+• Boat_owners details
+
+mysql> select * from boat_owners;
++----------+-------------+-------------+
+| owner_id | owner_name  | owner_phone |
++----------+-------------+-------------+
+|        1 | Basanagoud  | 7204794861  |
+|        2 | Ganapathi   | 9482456033  |
+|        3 | Manoranjan  | 7815001818  |
+|        4 | Basavakiran | 8123039241  |
++----------+-------------+-------------+
+4 rows in set (0.00 sec)
+
+• public_boat detais
+
+
+mysql> select * from public_boats;
++---------+---------------------+----------+----------------------+----------+
+| boat_id | boat_name           | capacity | pickup_drop_location | owner_id |
++---------+---------------------+----------+----------------------+----------+
+|       1 | Eco Wave            |        6 | Eco Beach            |        1 |
+|       2 | Sunset Sail         |        6 | Eco Beach            |        2 |
+|       3 | Sharavathi Glimpse  |        7 | Sharavathi           |        3 |
+|       4 | Sharavathi Explorer |        9 | Sharavathi           |        4 |
+|       5 | Bada Bliss          |        4 | Aghanashini River    |        1 |
+|       6 | Apsarakonda         |        6 | Sharavathi           |        2 |
++---------+---------------------+----------+----------------------+----------+
+6 rows in set (0.02 sec)
+-------------------------------------------------------------------------------------------
+• private_boat details
+
+
+mysql> select * from private_boats;
++---------+-----------------+----------------------+----------+
+| boat_id | boat_name       | pickup_drop_location | owner_id |
++---------+-----------------+----------------------+----------+
+|       1 | Silent Tide     | Sharavathi           |        3 |
+|       2 | Backwater Bliss | Sharavathi           |        4 |
+|       3 | Waves of Echo   | Eco Beach            |        1 |
+|       4 | Silent Shores   | Eco Beach            |        2 |
++---------+-----------------+----------------------+----------+
+4 rows in set (0.00 sec)
+---------------------------------------------------------------------------------------------
+
+• private_boat_booking
+DELIMITER //
+
+CREATE PROCEDURE Book_Private_Boat(
+    IN p_user_id INT,
+    IN p_boat_id INT,
+    IN p_booking_date DATE,
+    IN p_slot_id INT
+)
+BEGIN
+    DECLARE booking_exists INT;
+
+    -- Check if the provided date is in the past
+    IF p_booking_date < CURDATE() THEN
+        SELECT 'Please enter a valid date. Past dates are not allowed.' AS message;
+    ELSE
+        -- Check if the boat is already booked for the same date and slot
+        SELECT COUNT(*) INTO booking_exists
+        FROM Private_Boat_Status
+        WHERE boat_id = p_boat_id
+          AND booking_date = p_booking_date
+          AND slot_id = p_slot_id
+          AND is_available = FALSE;  -- Boat is already booked
+
+        -- If the boat is already booked, return an error
+        IF booking_exists > 0 THEN
+            SELECT 'Boat is already booked for this date and slot. Choose another boat or slot.' AS message;
+        ELSE
+            -- Insert booking into Private_Boat_Booking
+            INSERT INTO Private_Boat_Booking (user_id, boat_id, booking_date, slot_id)
+            VALUES (p_user_id, p_boat_id, p_booking_date, p_slot_id);
+
+            -- Insert or update Private_Boat_Status to mark boat as unavailable
+            INSERT INTO Private_Boat_Status (boat_id, booking_date, slot_id, is_available)
+            VALUES (p_boat_id, p_booking_date, p_slot_id, FALSE)
+            ON DUPLICATE KEY UPDATE is_available = FALSE;
+
+            -- Return success message
+            SELECT 'Booking successful!' AS message;
+        END IF;
+    END IF;
+END //
+
+DELIMITER ;
+-------------------------------------------------------------------------------------
+• Remove data from Private_boat_slots
+
+mysql> SET GLOBAL event_scheduler = ON;
+
+DELIMITER //
+
+CREATE EVENT Remove_Expired_Private_Boat_Status
+ON SCHEDULE EVERY 1 HOUR
+DO
+BEGIN
+    DELETE FROM Private_Boat_Status
+    WHERE booking_date < CURDATE()
+       OR (booking_date = CURDATE() AND slot_id IN (
+            SELECT slot_id FROM Private_Boat_Slots
+            WHERE (slot_id = 1 AND TIME(NOW()) > '10:00:00') -- Morning slot expired
+               OR (slot_id = 2 AND TIME(NOW()) > '14:00:00') -- Afternoon slot expired
+               OR (slot_id = 3 AND TIME(NOW()) > '18:00:00') -- Evening slot expired
+        ));
+END //
+
+DELIMITER ;
+
+----------------------------------------------------------------------------------------------
+
+• public_boat_booking
+
+DELIMITER //
+
+CREATE PROCEDURE Book_Public_Boat(
+    IN p_user_id INT,
+    IN p_boat_id INT,
+    IN p_booking_date DATE,
+    IN p_slot_id INT,
+    IN p_seats_booked INT
+)
+BEGIN
+    DECLARE v_available_seats INT;
+
+    -- Check if the entered date is in the past
+    IF p_booking_date < CURDATE() THEN
+        SELECT 'Please enter a valid date. Past dates are not allowed.' AS message;
+    ELSE
+        -- Check available seats from Public_Boat_Status
+        SELECT available_seats INTO v_available_seats
+        FROM Public_Boat_Status
+        WHERE boat_id = p_boat_id 
+          AND booking_date = p_booking_date 
+          AND slot_id = p_slot_id;
+
+        -- If no entry exists, initialize status with full capacity
+        IF v_available_seats IS NULL THEN
+            SELECT capacity INTO v_available_seats FROM Public_Boats WHERE boat_id = p_boat_id;
+            
+            -- Insert initial status
+            INSERT INTO Public_Boat_Status (boat_id, booking_date, slot_id, available_seats, boat_status)
+            VALUES (p_boat_id, p_booking_date, p_slot_id, v_available_seats, 'Available');
+        END IF;
+
+        -- Check if enough seats are available
+        IF v_available_seats >= p_seats_booked THEN
+            -- Insert into Public_Boat_Booking
+            INSERT INTO Public_Boat_Booking (user_id, boat_id, booking_date, slot_id, seats_booked)
+            VALUES (p_user_id, p_boat_id, p_booking_date, p_slot_id, p_seats_booked);
+
+            -- Update available seats
+            UPDATE Public_Boat_Status
+            SET available_seats = available_seats - p_seats_booked,
+                boat_status = CASE 
+                    WHEN available_seats - p_seats_booked = 0 THEN 'Full'
+                    ELSE 'Available'
+                END
+            WHERE boat_id = p_boat_id 
+              AND booking_date = p_booking_date 
+              AND slot_id = p_slot_id;
+            
+            SELECT 'Booking Successful' AS message;
+        ELSE
+            -- Not enough seats available
+            SELECT 'Not enough seats available. Choose another boat or slot.' AS message;
+        END IF;
+    END IF;
+END //
+
+DELIMITER ;
+
+-------------------------------------------------------------------------------------------------
+
+• Remove data from public_boat_slots
+
+DELIMITER //
+
+CREATE EVENT Remove_Expired_Public_Boat_Status
+ON SCHEDULE EVERY 1 HOUR
+DO
+BEGIN
+    DELETE FROM Public_Boat_Status
+    WHERE booking_date < CURDATE()
+       OR (booking_date = CURDATE() AND slot_id IN (
+            SELECT slot_id FROM Public_Boat_Slots
+            WHERE (slot_id = 1 AND TIME(NOW()) > '09:00:00') -- Morning slot expired
+               OR (slot_id = 2 AND TIME(NOW()) > '12:00:00') -- Midday slot expired
+               OR (slot_id = 3 AND TIME(NOW()) > '15:00:00') -- Afternoon slot expired
+               OR (slot_id = 4 AND TIME(NOW()) > '18:00:00') -- Evening slot expired
+        ));
+END //
+
+DELIMITER ;
+
+
+
+
